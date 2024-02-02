@@ -1,0 +1,22 @@
+.App {
+  display: flex;
+}
+
+.property-name p {
+  padding: 5px;
+  margin: 0px;
+}
+
+.property-name input {
+  padding: 5px;
+  margin: 5px;
+}
+
+.margin10px {
+  margin: 10px;
+}
+
+.bg-gainsboro {
+  background-color: gainsboro;
+  padding: 5px;
+}

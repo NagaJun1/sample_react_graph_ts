@@ -1,10 +1,9 @@
-.App {
+.flex {
   display: flex;
 }
 
 .property-name p {
   padding: 5px;
-  margin: 0px;
 }
 
 .property-name input {
@@ -12,8 +11,24 @@
   margin: 5px;
 }
 
+.padding_5px {
+  padding: 5px;
+}
+
+.margin5px {
+  margin: 5px;
+}
+
 .margin10px {
   margin: 10px;
+}
+
+.margin20px {
+  margin: 20px;
+}
+
+.min_width_50px {
+  min-width: 50px;
 }
 
 .bg-gainsboro {

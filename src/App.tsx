@@ -1,89 +1,88 @@
 import React, { ReactElement, useState } from 'react';
 import './css/App.css';
 import { Cell, Pie, PieChart } from 'recharts';
+import StackedBarChart from './ts/StackedBarChart';
+
+// 凡例（recharts）
+// https://recharts.org/en-US/examples
 
 // TODO 積み上げ棒グラフ
 // react-chartjs-2
 // https://qiita.com/ledsun/items/05d6d2725864488029bb
 
-
 const App = () => {
 
-  const [width, setWidth] = useState(400); // 円グラフの描写幅
-  const [height, setHeight] = useState(300); // 円グラフの描写高さ
-  const [outerRadius, setOuterRadius] = useState(100); // 円半径
+  /** チャートのシード値 */
+  const [chartSeed, setChartSeed] = useState(1);
+  // ↑ 更新することで、再描写（本当は、再描写しなくても、値更新可能なのでは？)
 
-  /** 半径変更 */
-  const updateRadius = (val: any) => {
-    // 半径（数値）を変更
-    setOuterRadius(checkNumber(val, 50, 300));
-
-    // 描写高さ、幅 = 半径 x 2 + 200
-    let width = outerRadius * 2;
-    setHeight(width + 200)
-    setWidth(width + 300)
-  };
-
-  /** 円のサイズダウン */
-  let sizeDown = function (event: React.MouseEvent<HTMLButtonElement>) {
-    updateRadius(outerRadius - 50)
+  /** チャートを更新する */
+  function reLoadChart() {
+    setChartSeed(Math.random());
   }
 
-  /** 円のサイズアップ */
-  let sizeUp = function (event: React.MouseEvent<HTMLButtonElement>) {
-    updateRadius(outerRadius + 50)
+  /** data の数値を増やす */
+  function addDataValue(index: number, addValue: number) {
+    data[index].value += addValue;
+    if (data[index].value < 0) {
+      data[index].value = 0; // 0を下回らない様にする
+    }
+    reLoadChart();
+  }
+
+  /** 円グラフ内の各項目の要素を修正 */
+  const ChangeInputs = () => {
+    let inputs: ReactElement[] = [];
+    data.forEach((data1) => {
+      inputs.push(
+        <div className='margin10px bg-gainsboro flex' key={data1.index}>
+          <p className='margin10px'>{data1.name}</p>
+          <button className='min_width_50px margin5px' onClick={() => {
+            addDataValue(data1.index, 1)
+          }}> +1 </button>
+          <button className='min_width_50px margin5px' onClick={() => {
+            addDataValue(data1.index, -1)
+          }}> -1 </button>
+        </div>)
+    })
+    return <>{inputs}</>;
   }
 
   return (<>
-    <div className="App">
-      <div className='property-name margin10px'>
-        <h3> 「recharts」のサンプル </h3>
-        <p>円グラフ、プロパティ</p>
-        <p> {"半径: " + outerRadius + "（50～300）"}</p>
-        <button onClick={sizeDown}>-50</button>
-        <button onClick={sizeUp}>+50</button>
-        <p>
-          ※作りこみ甘いですが、以下項目に入力後、<br />
-          上記ボタンでサイズを変更すると、 <br />
-          グラフの値が反映できます
-        </p>
-        <ChangeInputs />
-      </div>
-
-      {/* ↓ 円グラフの項目、data の値次第で、要素の修正が可能 */}
-      <PieChart width={width} height={height} className='margin10px'>
-        <Pie data={data} dataKey="value" cx="50%" cy="50%" outerRadius={outerRadius} fill="#82ca9d" label={label} > {
-          data.map((entry, index) =>
-            (<Cell key={`cell-${index}`} fill={COLORS[index]} />)
-          )
-        } </Pie>
-      </PieChart>
-    </div >
+    <div className='margin20px'>
+      <Header />
+      <StackedBarChart />
+      <div className="flex">
+        <div className='property-name margin10px'>
+          <h3>円グラフの値を更新</h3>
+          <ChangeInputs />
+        </div>
+        <PieChart key={chartSeed} width={750} height={500} className='margin10px'>
+          <Pie data={data} dataKey="value" cx="50%" cy="50%" outerRadius={200} fill="#82ca9d" label={label} > {
+            data.map((entry, index) =>
+              (<Cell key={`cell-${index}`} fill={COLORS[index]} />)
+            )
+          } </Pie>
+        </PieChart>
+      </div >
+    </div>
   </>);
 }
 
+const Header = () => (
+  <div className='flex'>
+    <h3 className='margin10px'>「recharts」のサンプル</h3>
+    <div className='margin10px'>
+      <p className='margin10px'>ソースコード</p>
+      <a href='https://github.com/NagaJun1/sample_react_graph_ts'>
+        https://github.com/NagaJun1/sample_react_graph_ts
+      </a>
+    </div>
+  </div>
+);
+
 /** 円グラフの各要素の色 */
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
-
-/** 円グラフ内の各項目の要素を修正 */
-const ChangeInputs = () => {
-  let inputs: ReactElement[] = [];
-  data.forEach((data1) => {
-    inputs.push(<div className='margin10px bg-gainsboro' key={data1.index}>
-      <p>{"ラベル" + (1 + data1.index).toString()}</p>
-      <input onChange={((event) => {
-        data1.name = event.target.value; // ラベルの書き換え
-      })} />
-
-      <p> 値（0~500）</p>
-      <input onChange={(event) => {
-        // TODO 値書換で、<PieChart> を再描写する
-        data1.value = checkNumber(event.target.value, 0, 500)
-      }} />
-    </div>)
-  })
-  return <>{inputs}</>;
-}
+const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", '#afeeee'];
 
 /** 円グラフのラベル定義 */
 const label = ({ name }: any) => {
@@ -95,23 +94,23 @@ let data = [
   {
     index: 0,
     name: 'データ1',
-    value: 300,
+    value: 10,
   }, {
     index: 1,
     name: 'データ2',
-    value: 200,
+    value: 2,
   }, {
     index: 2,
     name: 'データ3',
-    value: 380,
+    value: 3,
   }, {
     index: 3,
     name: 'データ4',
-    value: 80,
+    value: 4,
   }, {
     index: 4,
     name: 'データ5',
-    value: 40,
+    value: 5,
   }
 ];
 
